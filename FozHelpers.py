@@ -272,18 +272,18 @@ def isBlank(arg):
     else:
         raise ValueError, "illegal type: %s" % (argType)
         
-def fetchRemoteFile(url, token=None, localFile=None, permissions=None, owner=None, group=None, retries=0):
+def fetchRemoteFile(url, localFile=None, permissions=None, owner=None, group=None, retries=0):
     "Fetch a remote file and either write it to a local file or return it"
-    if token:
-        cookie = "iPlanetDirectoryPro=%s" % (token)
-    else:
-        cookie = None
+    # if token:
+    #     cookie = "iPlanetDirectoryPro=%s" % (token)
+    # else:
+    #     cookie = None
     while retries > -1:
         try:
             if localFile:
                 contents = urllib.URLopener()
-                if cookie:
-                    contents.addheader('Cookie', cookie)
+                # if cookie:
+                #     contents.addheader('Cookie', cookie)
                 contents.retrieve(url, localFile)
                 contents.close()
                 if permissions:
@@ -567,8 +567,10 @@ def runCmd(command, ignoreRC=True, asUser=None):
     else:
         return rc
         
-def addUser(username, shell=None, homeDir=None, createHome=False):
-    cmd = "useradd "
+def addUser(username, uid=None, group=None, shell=None, homeDir=None, createHome=False):
+    cmd = "/usr/sbin/useradd "
+    cmd += "-u %d" % (uid) if uid else " "
+    cmd += "-g %s" % (group) if group else " "
     cmd += "-s %s " % (shell) if shell else " "
     cmd += "-d %s " % (homeDir) if homeDir else " "
     cmd += "-m " if createHome else "-M "
@@ -576,3 +578,24 @@ def addUser(username, shell=None, homeDir=None, createHome=False):
     
     rc = runCmd(cmd)
     return rc
+
+def addGroup(groupname, gid=None):
+    cmd = "/usr/sbin/groupadd "
+    cmd += "-g %d" % (gid) if gid else " "
+    cmd += groupname
+    
+    rc = runCmd(cmd)
+    return rc
+
+def setPassword(username, password):
+    cmd = "echo '%s' | /usr/bin/passwd --stdin %s" % (password, username)
+    rc = runCmd(cmd)
+    return rc
+    
+def removeTimestamp(filename):
+    # Remove timestamp added by webresource , e.g 2011-01-25T13-31-20-latest.tar.gz
+    import re
+    tsPattern=r'^(19|20)\d\d[- / .](0[1-9]|1[012])[- / .](0[1-9]|[12][0-9]|3[01])T(0[0-9]|1[0-9]|2[0-4])[- / .](0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]|60)[- / .](0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]|60)-'
+    
+    return re.sub(tsPattern, '', filename)
+    
