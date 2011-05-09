@@ -17,6 +17,8 @@ When /I have (.*) task$/ do |action|
       @task.finish
    when /failed a/
       @task.fail
+   when /cleared a/
+      @task.clear
    end
 end
 
