@@ -19,12 +19,12 @@ class String
       return nil if item.nil?
       item.chr
    end
-   
+
    def unshift(other)
       newself = other.to_s.dup.pop.to_s + self
       self.replace(newself)
    end
-   
+
    def pop
       return nil if self.empty?
       item=self[-1]
@@ -32,12 +32,12 @@ class String
       return nil if item.nil?
       item.chr
    end
-   
+
    def push(other)
       newself = self + other.to_s.dup.shift.to_s
       self.replace(newself)
    end
-   
+
    def rotate_left(n=1)
       n=1 unless n.kind_of? Integer
       n.times do
@@ -46,7 +46,7 @@ class String
       end
       self
    end
-   
+
    def rotate_right(n=1)
       n=1 unless n.kind_of? Integer
       n.times do
@@ -55,10 +55,10 @@ class String
       end
       self
    end
-   
+
    @@first_word_re = /^(\w+\W*)/
    @@last_word_re  = /(\w+\W*)$/
-   
+
    def shift_word
       # shifts first word off of self
       # and returns; changes self
@@ -68,18 +68,18 @@ class String
       self.replace(newself) unless $`.nil?
       $1
    end
-   
+
    def acronym(thresh=0)
       self.split.find_all {|w| w.length > thresh }.
       collect {|w| w[0,1].upcase}.join
    end
-      
+
    def unshift_word(other)
       # Adds provided string to front of self
       newself = other.to_s + self
       self.replace(newself)
    end
-   
+
    def pop_word
       # pops and returns last word off self
       # changes self
@@ -89,23 +89,23 @@ class String
       self.replace(newself) unless $`.nil?
       $1
    end
-   
+
    def push_word(other)
       # pushes provided string onto end of self
       newself = self + other.to_s
       self.replace(newself)
    end
-   
+
    def rotate_word_left
       word = self.shift_word
       self.push_word(word)
    end
-   
+
    def rotate_word_right
       word = self.pop_word
       self.unshift_word(word)
    end
-      
+
    # Patch the string class to give a rightstr function
    # Call with String.rightstr(length)
 
@@ -220,18 +220,18 @@ end
 
 class Time
    # Monkeypatch the time class to include other conversions
-   
+
    def internet_time
       t = self.gmtime + 3600 # Biel, Switzerland
       midnight = Time.gm(t.year, t.month, t.day)
       secs = t - midnight
       beats = (secs/86.4).to_i
    end
-               
+
    def timestamp
       self.strftime("%D %T")
    end
-   
+
    def iso8601
       # Generate an ISO-8601 formatted date string in UTC, offsetDays from now yyyy-mm-dd'T'HH:MM:SS.fff'Z'.
       self.w3cdtf[/^.+\.\d+/] + "Z"
@@ -249,7 +249,7 @@ end
 
 class Node
    attr_reader :value, :ptr
-   
+
    def initialize(value, ptr)
       @value, @ptr = value, ptr
    end
@@ -257,29 +257,29 @@ end
 
 class LinkedList
    include Enumerable
-   
+
    attr_reader :size, :head
-   
+
    def initialize
       clear
       self
    end
-   
+
    def clear
       @head, @tail, @size = nil, nil, 0
    end
-   
+
    def empty?
       head.nil?
    end
-   
+
    def push(value)
       @head = Node.new(value, head)
       @size += 1
       @last = @head if @last.nil?
       self
    end
-   
+
    def pop
       return nil if empty?
       @size -= 1
@@ -292,20 +292,20 @@ class LinkedList
    def append(value)
       replace reverse.push(value).reverse
    end
-   
+
    def reverse
       new_list = self.class.new
       self.each { |x| new_list << x }
       new_list
    end
-   
+
    def reverse!
       replace reverse
    end
 
    def each
       return nil if empty?
-      
+
       node = head
       loop do
          yield node.value
@@ -318,23 +318,23 @@ class LinkedList
       return nil if empty?
       @last.value
    end
-   
+
    def first
       return nil if empty?
       @head.value
    end
-   
+
    def ==(other)
      head == other.head
    end
-   
+
    def replace(other)
       new_list = self.dup
       clear
       other.reverse.each { |x| push(x) }
       self
    end
-   
+
    alias_method :<<, :push
    alias_method :unshift, :push
    alias_method :length, :size
@@ -342,22 +342,22 @@ class LinkedList
 end
 
 class Task < Object
-   
+
    attr_accessor :name, :status, :percent, :start_time, :end_time
-   
+
    def initialize(name=nil, *options)
       if options.empty?
          options = {}
       else
          options = options[0]
       end
-      
+
       @name        = name
-      
+
       @status      = options[:status]     || 'pending'
       @percent     = options[:percent]    || 0
       @start_time  = options[:start_time] || ''
-      @end_time    = options[:end_time]   || ''         
+      @end_time    = options[:end_time]   || ''
    end
 
    def to_s
@@ -368,24 +368,30 @@ class Task < Object
       # Mark the current task as active"
       @status     = 'active'
       @start_time = Time.now.iso8601
+      @end_time   = ''
+      @percent    = 0
       self
    end
- 
+
     def finish
        # Mark the task as complete
        @status   = 'complete'
        @percent  = 100
-       @end_time = Time.now.iso8601
-       self
+       now = Time.now.iso8601
+       if @start_time.blank?
+           @start_time = now
+       end
+       @end_time = now
+       return self
     end
-   
+
    def fail
       # Mark the task as failed
       @status   = 'failed'
       @end_time = Time.now.iso8601
       self
    end
-   
+
    def clear
       # Clear the task and set it to pending
       @status     = 'pending'
@@ -398,25 +404,25 @@ end
 
 class Tasklist
    protected
-   
+
    attr_writer :current_task
-   
+
    public
-      
+
    attr_accessor :filename
 
    # getters
-   
+
    def current_task
       @tasks[@current_task]
    end
-   
+
    def status
       @status
    end
-   
+
    # constructors, iterators, etc.
-   
+
    def initialize(filename=nil)
         @tasks = []
         @current_task = -1
@@ -424,23 +430,23 @@ class Tasklist
         @status = 0
         self
    end
-   
+
    def each
       @tasks.each { |task| yield task }
    end
-   
+
    def each_with_index
       @tasks.each_with_index {|task, index| yield [task, index] }
    end
-   
+
    alias :with_index :each_with_index
-   
+
    def to_s
       @tasks * "\n"
    end
 
    # class methods
-   
+
    def add(task)
       if task.instance_of? String
          t = Task.new(task)
@@ -449,9 +455,9 @@ class Tasklist
       else
          raise TypeError, "Can only add tasks to tasklist"
       end
-      
+
       @tasks << t
-      
+
       self
    end
 
@@ -460,33 +466,33 @@ class Tasklist
          # Should throw an exception here
          raise ArgumentError, "attempt to delete from an empty tasklist"
       end
-      
+
       if task_number > @tasks.length - 1 or task_number < 0
          # throw an exception
          raise ArgumentError, "attempt to delete an invalid task"
       end
-         
+
       if task_number == @current_task
          self.next
          @current_task -= 1
       end
-      
+
       @tasks.delete_at(task_number)
       self.save
-      
+
       @status = (@current_task + 1.0 / @tasks.length * 100).to_i
-      
+
       self
    end
-   
+
    def next
       if @current_task != -1
          @tasks[@current_task].finish
          @status = (@current_task + 1.0 / @tasks.length * 100).to_i
       end
-      
+
       @current_task += 1
-      
+
       if @current_task < @tasks.length
          @tasks[@current_task].start
       else
@@ -496,65 +502,65 @@ class Tasklist
       self.save
       self
    end
-   
+
    def abort
       # mark the current task as failed and reset the task pointer
       if @current_task == -1
          self
       end
-   
+
       @tasks[@current_task].fail
       @current_task = -1
       self.save
       self
    end
-   
+
    def finish
       # mark all outstanding jobs as finished by incrementing through the task list
       true while self.next
-   
+
       self.save
       self
    end
-   
+
    def start
       # Reset all the tasks in the queue to pending and move the task pointer to the beginning
-   
+
       @tasks.collect! {|x| x.clear}
-   
+
       @current_task = 0
       @status = 0
       @tasks[@current_task].start
-   
+
       self.save
       self
    end
-   
+
    def clear
       @tasks = []
       @current_task = -1
       self
    end
-   
+
    def save(filename=nil)
       # Persist ourself to a filename
-   
+
       filename = @filename if filename.nil?
-         
+
       if not filename.nil?
          marshal = @current_task.to_s + "\n"
          marshal << self.to_s
-         
+
          File.open(filename, "w") do |fd|
             fd.write(marshal)
          end
       end
       self
    end
-   
+
    def load(filename=nil)
       filename = @filename if filename.nil?
-   
+
       if not filename.nil?
          rep = self.class.new
          File.open(filename, "r") do |fd|
@@ -568,10 +574,10 @@ class Tasklist
          rep
       end
    end
-   
+
    def load!(filename=nil)
       filename = @filename if filename.nil?
-   
+
       if not filename.nil?
          File.open(filename, "r") do |fd|
             clear
@@ -583,7 +589,7 @@ class Tasklist
             end
          end
          self
-      end      
+      end
    end
 end
 
@@ -623,7 +629,7 @@ module Helpers
       end
       bytes
    end
-   
+
    def Helpers.get_ec2_public_hostname
       Helpers.fetch_remote_file("http://169.254.169.254/2009-04-04/meta-data/public-hostname")
    end
@@ -634,11 +640,11 @@ module Helpers
       else
          options = options[0]
       end
-   
+
       owner       = options[:owner] || nil
       group       = options[:group] || nil
       permissions = options[:permissions] || nil
-   
+
       close = false
 
       if filename.instance_of?(String)
@@ -662,7 +668,7 @@ module Helpers
       unless owner.nil? and group.nil?
          Helpers.chown(fd, owner, group)
       end
-   
+
       if close
          fd.close()
       end
@@ -672,7 +678,7 @@ module Helpers
    def Helpers.chown(filename, owner, group)
       uid = Etc.getpwnam(owner).uid unless owner.nil?
       gid = Etc.getgrnam(group).gid unless group.nil?
-   
+
       if filename.instance_of? String
          FileUtils.chown(uid, gid, filename)
       elsif filename.instance_of? File
@@ -687,19 +693,19 @@ module Helpers
       results = %x[cmd]
       $?
    end
-      
+
    def Helpers.get_progress_log_name
       me = File::basename($0)[/^.*?(?=\.template)/]
       "/opt/nodeagent/handlers/state/#{me}.status"
    end
-   
+
    def Helpers.add_user(username, *options)
       if options.empty?
          options = {}
       else
          options = options[0]
       end
-   
+
       shell       = options[:shell] || nil
       home        = options[:home] || nil
       create_home = options[:create_home] || false
@@ -712,11 +718,11 @@ module Helpers
 
       Helpers.run_cmd(cmd)
    end
-   
+
    def Helpers.install_packages(packages)
       if packages.instance_of? String
          packages = [packages]
-      
+
       for pkg in packages
           rc = Helpers.run_cmd("! /usr/bin/yum install -y --nogpgcheck %s | egrep '^No package .+ available\.' 2>&1 >/dev/null " % (pkg))
           if rc
@@ -725,5 +731,5 @@ module Helpers
        end
        true
     end
-   end   
+   end
 end

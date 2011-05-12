@@ -1,45 +1,61 @@
 require 'FozHelpers'
 
-Before do
+Given /^I have a task$/ do
    @task = Task.new
 end
 
-After do
-end
-
-When /I have (.*) task$/ do |action|
-   case action
-   when /created a new/
-      @task = Task.new
-   when /started a/
+When /I have a (\w+) task$/ do | state |
+   case state
+   when /pending/
+   when /started/
       @task.start
-   when /finished a/
+   when /finished/
       @task.finish
-   when /failed a/
+   when /failed/
       @task.fail
-   when /cleared a/
+   when /cleared/
       @task.clear
-   end
-end
-
-Given /I have a task in progress/ do
-   @task.start
-end
-
-Then /the (.*) should be (.*)/ do |variable, value|
-   my_value = @task.instance_variable_get("@#{variable}")
-   if value == 'blank'
-      my_value.blank?.should == true
    else
-      my_value.to_s.should == value
+       raise "Invalid starting condition #{action} requested"
    end
 end
 
-Then /the (.*) should not be (.*)/ do |variable, value|
-   my_value = @task.instance_variable_get("@#{variable}")
-   if value == 'blank'
-      my_value.blank?.should == false
-   else
-      my_value.to_s.should != value
-   end
+When /I attempt to (\w*) it$/ do | action |
+    case action
+    when /^start$/
+        @task.start
+    when /^finish$/
+        @task.finish
+    when /^clear$/
+        @task.clear
+    when /^fail$/
+        @task.fail
+    else
+        raise "Invalid action #{action} attempted"
+    end
+
 end
+
+Then /the status should be (\w*)$/ do | status |
+    @task.status.should == status
+end
+
+Then /it should be (\w*) % complete$/ do | percent_complete |
+    unless percent_complete.blank?
+        @task.percent.should == percent_complete.to_i
+    end
+end
+
+Then /^the start time should be (blank|not_blank)$/ do | start_time |
+    if start_time == "blank"
+        @task.start_time.blank?.should == true
+    else
+        @task.start_time.blank?.should == false
+    end
+end
+
+Then /^the end time should be (\w*)$/ do | end_time |
+end
+
+
+
