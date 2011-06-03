@@ -1,9 +1,6 @@
 Feature: Task Transition Features
-  In order to ensure that my task class works
-  As a Developer
-  I want to test my task class
+  Scenario Outline: A task changes state
 
-Scenario Outline: transition a task
   Given I have a task
   When I have a <start_state> task
   And I attempt to <action> it

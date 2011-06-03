@@ -1,4 +1,5 @@
 require 'FozHelpers'
+require 'cuke-patterns'
 
 Given /^I have a task$/ do
    @task = Task.new
@@ -57,5 +58,7 @@ end
 Then /^the end time should be (\w*)$/ do | end_time |
 end
 
-
+Pattern :number, /^\d+$/ do |number|
+    number.to_i
+end
 
