@@ -6,12 +6,16 @@ require 'open-uri'
 require 'net/http'
 require 'etc'
 require 'FileUtils'
+require 'term/ansicolor'
 
 #####
 ##### Generic monkeypatches to extend existing base classes
 #####
 
 class String
+   # Give us the ability to do things like puts 'foo'.red.bold
+   include Term::ANSIColor
+
    def shift
       return nil if self.empty?
       item=self[0]
@@ -153,42 +157,6 @@ class String
       else
          super
       end
-   end
-
-   def colorize(text, color_code)
-       "#{color_code}#{text}\e[0m"
-   end
-
-   def red
-       colorize(self, "\e[1m\e[31m")
-   end
-
-   def green
-       colorize(self, "\e[1m\e[32m")
-   end
-
-   def dark_green
-       colorize(self, "\e[32m")
-   end
-
-   def yellow
-       colorize(self, "\e[1m\e[33m")
-   end
-
-   def blue
-       colorize(self, "\e[1m\e[34m")
-   end
-
-   def dark_blue
-       colorize(self, "\e[34m")
-   end
-
-   def magenta
-       colorize(self, "\e[1m\e[35m")
-   end
-
-   def cyan
-       colorize(self, "\e[36m")
    end
 end
 
