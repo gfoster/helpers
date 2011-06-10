@@ -29,15 +29,15 @@ class Tool
         $extra_options << [short, long, block, hints]
     end
 
+    Kernel.send :define_method, :setup do |&block|
+        @@setupHook << block
+    end
+
     protected
 
     Kernel.send :define_method, :command do |command, help_text, &block|
         @@help_text[command.to_s] = help_text
         Tool.send :define_method, command, &block
-    end
-
-    Kernel.send :define_method, :setup do |&block|
-        @@setupHook << block
     end
 
     public
