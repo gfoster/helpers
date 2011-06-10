@@ -3,6 +3,8 @@
 require 'rubygems'
 require 'optparse'
 
+$extra_options = []
+
 class Tool
     @@help_text = {}
     @@setupHook = []
@@ -10,13 +12,21 @@ class Tool
     # This will define some sugar to allow us to define new commands on the fly
     # with "command :command_name, :help_text, do ... end syntax
 
-    protected
+    private
 
     Kernel.send :define_method, :command do |command, help_text, &block|
         cmd_name = "cmd_#{command}"
         @@help_text[command.to_s] = help_text
         Tool.send :define_method, command, &block
     end
+
+    Kernel.send :define_method, :option do |*args, &block|
+        short = args[0].to_s
+        long = nil || args[1].to_s
+        $extra_options << [short, long, block]
+    end
+
+    protected
 
     Kernel.send :define_method, :setup do |&block|
         @@setupHook << block
@@ -55,6 +65,20 @@ def main()
     optparse = OptionParser.new do |opts|
         opts.banner = "Usage foo [options] ..."
 
+        $extra_options.each do |short, long, block|
+            # name each option after the long name, falling back to the short name if not given
+            options[short.to_sym] = nil
+            # This currently requires all switches to have a param, need to figure out
+            # how to allow for toggles (no do || end block)
+            opts.on("-#{short}", "--#{long} #{long.upcase}") do |param|
+                if block.nil?
+                    options[short.to_sym] = param
+                else
+                    options[short.to_sym] = block.call
+                end
+            end
+        end
+
         options[:user] = nil
         opts.on('-u', '--user USERNAME', 'username (optional)') do |user|
             options[:username] = user
@@ -77,6 +101,8 @@ def main()
     subcommand = ARGV[1..-1]
 
     tool = Tool.new(options)
+
+debugger
     if tool.respond_to?(command)
         tool.send(command, subcommand)
     else
@@ -88,6 +114,3 @@ end
 if $0 == __FILE__
     main
 end
-
-
-

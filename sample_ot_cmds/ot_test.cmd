@@ -19,3 +19,21 @@ command :foo, "help text for the foo command" do
     puts "in the foo method, @blah = #{@blah}"
     help
 end
+
+# and this is how we define options
+
+# This one defines options[:s] and is the "-s" switch
+
+option :s
+
+# This one defines options[:medium] and will show up as "-m" and "--medium"
+
+option :m, :medium # this one will show up as "-m and --medium"
+
+# this one will set the value of options[:long] to "foo" when encountered
+# don't use a return, because this is a closure that doesn't expect a return
+
+option :l, :long do
+    "foo"
+end
+
