@@ -2,6 +2,7 @@
 
 require 'rubygems'
 require 'optparse'
+require 'ruby-debug'
 
 $extra_options = []
 
@@ -9,24 +10,33 @@ class Tool
     @@help_text = {}
     @@setupHook = []
 
-    # This will define some sugar to allow us to define new commands on the fly
-    # with "command :command_name, :help_text, do ... end syntax
-
     private
 
-    Kernel.send :define_method, :command do |command, help_text, &block|
-        cmd_name = "cmd_#{command}"
-        @@help_text[command.to_s] = help_text
-        Tool.send :define_method, command, &block
-    end
+    # need to add a way to pass a description string as well
 
     Kernel.send :define_method, :option do |*args, &block|
         short = args[0].to_s
-        long = nil || args[1].to_s
-        $extra_options << [short, long, block]
+        if args.last.kind_of? Hash
+            hints = args.last
+        else
+            hints = {}
+        end
+
+        if args[1].kind_of? Hash
+            long = ""
+        else
+            long = args[1].to_s
+        end
+
+        $extra_options << [short, long, block, hints]
     end
 
     protected
+
+    Kernel.send :define_method, :command do |command, help_text, &block|
+        @@help_text[command.to_s] = help_text
+        Tool.send :define_method, command, &block
+    end
 
     Kernel.send :define_method, :setup do |&block|
         @@setupHook << block
@@ -65,28 +75,31 @@ def main()
     optparse = OptionParser.new do |opts|
         opts.banner = "Usage foo [options] ..."
 
-        $extra_options.each do |short, long, block|
+        $extra_options.each do |short, long, block, hints|
             # name each option after the long name, falling back to the short name if not given
-            options[short.to_sym] = nil
-            # This currently requires all switches to have a param, need to figure out
-            # how to allow for toggles (no do || end block)
-            opts.on("-#{short}", "--#{long} #{long.upcase}") do |param|
-                if block.nil?
-                    options[short.to_sym] = param
-                else
-                    options[short.to_sym] = block.call
+            if long.empty?
+                key = short.to_sym
+                long_switch = nil
+            else
+                key = long.to_sym
+                long_switch = "--#{long} #{long.to_s.upcase}"
+            end
+
+            description = hints[:description]
+
+            if hints.include?(:switch) and hints[:switch]
+                opts.on("-#{short}", long_switch, description) do
+                    options[key] = true
+                end
+            else
+                opts.on("-#{short}", long_switch, description) do |param|
+                    if block.nil?
+                        options[key] = param
+                    else
+                        options[key] = block.call
+                    end
                 end
             end
-        end
-
-        options[:user] = nil
-        opts.on('-u', '--user USERNAME', 'username (optional)') do |user|
-            options[:username] = user
-        end
-
-        options[:password] = nil
-        opts.on('-p', '--password PASSWORD', 'password (optional)') do |password|
-            options[:password] = password
         end
 
         opts.on('-h', '--help', 'Display this screen') do
@@ -102,7 +115,6 @@ def main()
 
     tool = Tool.new(options)
 
-debugger
     if tool.respond_to?(command)
         tool.send(command, subcommand)
     else

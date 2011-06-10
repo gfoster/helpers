@@ -1,6 +1,7 @@
 setup do
     require 'jira4r/jira4r'
-    jirahost = @options[:jirahost] || "https://jira.serv.io"
+    jirahost = @options[:jirahost] || "http://jira.atlassian.com"
+puts "jirahost: #{jirahost}"
     @jira = Jira4R::JiraTool.new(2, jirahost)
     @jira.log_level=4
     unless @options[:username].nil? or @options[:password].nil?
@@ -53,3 +54,7 @@ command :get_branch, "show the branch name from the issue" do |issue|
     puts issue.customFieldValues[0].values
     return self
 end
+
+option :u, :user
+option :p, :password
+option :j, :jirahost

@@ -20,20 +20,12 @@ command :foo, "help text for the foo command" do
     help
 end
 
-# and this is how we define options
+option :s, :switch => true, :description => "a simple switch"
 
-# This one defines options[:s] and is the "-s" switch
+option :m, :medium
 
-option :s
-
-# This one defines options[:medium] and will show up as "-m" and "--medium"
-
-option :m, :medium # this one will show up as "-m and --medium"
-
-# this one will set the value of options[:long] to "foo" when encountered
-# don't use a return, because this is a closure that doesn't expect a return
-
-option :l, :long do
-    "foo"
+option :l, :long, :description => "a long switch with a block" do
+	"blah blah"
 end
+
 
