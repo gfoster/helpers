@@ -10,26 +10,28 @@ class Tool
     # This will define some sugar to allow us to define new commands on the fly
     # with "command :command_name, :help_text, do ... end syntax
 
+    protected
+
     Kernel.send :define_method, :command do |command, help_text, &block|
         cmd_name = "cmd_#{command}"
         @@help_text[command.to_s] = help_text
-        Tool.send :define_method, cmd_name, &block
+        Tool.send :define_method, command, &block
     end
 
     Kernel.send :define_method, :setup do |&block|
         @@setupHook << block
     end
 
-    def initialize(options)
+    public
+
+    def initialize(options=nil)
         @options = options
-        #debugger
         @@setupHook.each { |step| self.instance_eval(&step) }
         return self
     end
 
     command :help, "Print this list" do
-        cmd_list = self.public_methods.grep(/^cmd_/)
-        cmd_list.collect! { |cmd| cmd[4..-1] }
+        cmd_list = self.protected_methods
         puts "list of supported commands: "
         help_output = cmd_list.collect do
             |cmd| cmd + "\t\t" + (@@help_text.include?(cmd) ? @@help_text[cmd] : "")
@@ -64,7 +66,7 @@ def main()
 
     optparse.parse!
 
-    command = "cmd_" + (ARGV[0].nil? ? "help" : ARGV[0])
+    command = ARGV[0] || "help"
     subcommand = ARGV[1..-1]
 
     tool = Tool.new(options)

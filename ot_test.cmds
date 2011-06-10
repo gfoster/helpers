@@ -17,4 +17,5 @@ end
 # as well
 command :foo, "help text for the foo command" do
     puts "in the foo method, @blah = #{@blah}"
+    help
 end
