@@ -50,6 +50,8 @@ class Tool
         return self
     end
 
+    # default commands - always have a help command
+
     command :help, "Print this list" do
         cmd_list = self.protected_methods
         puts "list of supported commands: "
@@ -58,6 +60,8 @@ class Tool
         end
         puts help_output.join("\n")
     end
+
+    # load our chameleon command file based upon our own name
 
     cmd_file = "#{ENV['HOME']}/.ot_cmds/" << File.basename($0) << ".cmd"
 
@@ -101,6 +105,8 @@ def main()
                 end
             end
         end
+
+        # and we always have a default -h switch
 
         opts.on('-h', '--help', 'Display this screen') do
             puts opts
