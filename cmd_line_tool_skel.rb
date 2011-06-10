@@ -39,7 +39,14 @@ class Tool
         puts help_output.join("\n")
     end
 
-    load "ot_test.cmds"
+    cmd_file = "#{ENV['HOME']}/.ot_cmds/" << File.basename($0) << ".cmd"
+
+    if FileTest.exists?(cmd_file)
+        load cmd_file
+    else
+        puts "Could not find a command file for myself in #{cmd_file}"
+        exit 1
+    end
 end
 
 def main()
