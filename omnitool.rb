@@ -12,8 +12,6 @@ class Tool
 
     private
 
-    # need to add a way to pass a description string as well
-
     Kernel.send :define_method, :option do |*args, &block|
         short = args[0].to_s
         if args.last.kind_of? Hash
