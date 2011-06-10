@@ -5,35 +5,39 @@ require 'optparse'
 
 class Tool
     @@help_text = {}
-
-    def initialize(options)
-        @options = options
-        return self
-    end
+    @@setupHook = []
 
     # This will define some sugar to allow us to define new commands on the fly
     # with "command :command_name, :help_text, do ... end syntax
 
     Kernel.send :define_method, :command do |command, help_text, &block|
         cmd_name = "cmd_#{command}"
-        define_method(cmd_name, &block)
         @@help_text[command.to_s] = help_text
+        Tool.send :define_method, cmd_name, &block
     end
 
-    # and here's our commands.  They will automagically show up in any help listings
-    # as well
+    Kernel.send :define_method, :setup do |&block|
+        @@setupHook << block
+    end
+
+    def initialize(options)
+        @options = options
+        #debugger
+        @@setupHook.each { |step| self.instance_eval(&step) }
+        return self
+    end
 
     command :help, "Print this list" do
         cmd_list = self.public_methods.grep(/^cmd_/)
         cmd_list.collect! { |cmd| cmd[4..-1] }
         puts "list of supported commands: "
-        help_output = cmd_list.collect { |cmd| cmd + "\t\t" + (@@help_text.include?(cmd) ? @@help_text[cmd] : "") }
+        help_output = cmd_list.collect do
+            |cmd| cmd + "\t\t" + (@@help_text.include?(cmd) ? @@help_text[cmd] : "")
+        end
         puts help_output.join("\n")
     end
 
-    command :foo, "help text for the foo command" do
-        puts "in the #{__method__} method"
-    end
+    load "ot_test.cmds"
 end
 
 def main()
