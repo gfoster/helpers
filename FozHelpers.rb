@@ -8,6 +8,12 @@ require 'etc'
 require 'FileUtils'
 require 'term/ansicolor'
 
+####
+#### Useful constants
+####
+
+EMAIL_REGEXP =  Regexp.new(/[^ @]+@[^ @]+\.[^ @]+/)
+
 #####
 ##### Generic monkeypatches to extend existing base classes
 #####
