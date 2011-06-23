@@ -27,4 +27,3 @@ Feature: Task Transition Features
      | failed      | finish | complete  | not_blank  | not_blank |     100 |
      | failed      | clear  | pending   | blank      | blank     |       0 |
      | failed      | fail   | failed    | blank      | not_blank |         |
-

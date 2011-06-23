@@ -1,5 +1,3 @@
-require 'FozHelpers'
-
 Given /^I have a task$/ do
    @task = Task.new
 end

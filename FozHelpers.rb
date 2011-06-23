@@ -1,5 +1,6 @@
 # This is a collection of useful hacks, monkeypatches, class extensions, overrides, etc.
 
+require 'rubygems'
 require 'enumerator'
 require 'rss'
 require 'open-uri'
