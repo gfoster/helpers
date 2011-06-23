@@ -5,7 +5,7 @@ require 'rss'
 require 'open-uri'
 require 'net/http'
 require 'etc'
-require 'FileUtils'
+require 'fileutils'
 require 'term/ansicolor'
 
 ####
