@@ -77,7 +77,7 @@ class String
       self=~@@first_word_re
       newself = $' || ""   # $' is POSTMATCH
       self.replace(newself) unless $`.nil?
-      $1
+      $1.strip
    end
 
    def acronym(thresh=0)
@@ -87,7 +87,7 @@ class String
 
    def unshift_word(other)
       # Adds provided string to front of self
-      newself = other.to_s + self
+      newself = other.to_s + " " + self
       self.replace(newself)
    end
 
@@ -97,13 +97,14 @@ class String
       return nil if self.empty?
       self=~@@last_word_re
       newself=$` || ""  # $` is PREMATCH
+      newself.rstrip!
       self.replace(newself) unless $`.nil?
       $1
    end
 
    def push_word(other)
       # pushes provided string onto end of self
-      newself = self + other.to_s
+      newself = self + " " + other.to_s
       self.replace(newself)
    end
 
