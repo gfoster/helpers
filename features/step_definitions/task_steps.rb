@@ -1,5 +1,5 @@
 Given /^I have a task$/ do
-   @task = Task.new
+   @task = Helpers::Task.new
 end
 
 When /I have a (\w+) task$/ do | state |
