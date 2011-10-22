@@ -255,11 +255,128 @@ end
 #####
 
 
-### Basic node and linked list class
-### LL class implements push, pop, and iterators
-### as well as convenience getters for LinkedList#last and #first
-
 module Helpers
+    ## basic doubly-linked list
+
+    class List
+        include Enumerable
+
+        ListElem = Struct.new(:obj, :prev, :next)
+
+        attr_accessor :head, :tail
+
+        def initialize(*enum)
+            @head = @tail = ListElem.new
+            @head.next = @head
+            @head.prev = @head
+            (enum.size == 1 && Enumerable === enum[0] ?
+                enum[0] :
+                enum).each {|e| append e}
+        end
+
+        def append(e)
+            tmp = ListElem.new(e, @tail.prev, @tail)
+            tmp.prev.next = tmp
+            tmp.next.prev = tmp
+            self
+        end
+
+        def prepend(e)
+            tmp = ListElem.new(e, @head, @head.next)
+            tmp.prev.next = tmp
+            tmp.next.prev = tmp
+            self
+        end
+
+        # return the head and remove it from the list
+
+        def shift
+            val = @head.next.obj
+            @head.next = @head.next.next
+            @head.next.prev = @head
+            val
+        end
+
+        # return the tail and remove it from the list
+        def pop
+            val = @tail.prev.obj
+            @tail.prev = @tail.prev.prev
+            @tail.prev.next = @tail
+            val
+        end
+
+        def length
+            self.collect.length
+        end
+
+        def [](index)
+
+            if index >= self.length or index < 0
+                raise RangeError
+            end
+
+            node = @head.next
+
+            index.times do
+                node = node.next
+            end
+
+            node.obj
+        end
+
+        def []=(index, value)
+            if index >= self.length or index < 0
+                raise RangeError
+            end
+
+            node = @head.next
+
+            index.times do
+                node = node.next
+            end
+
+            node.obj = value
+            value
+        end
+
+        def to_a
+            self.collect
+        end
+
+        alias :<< :append
+
+        alias :count :length
+        alias :size :length
+
+        def each
+            node = @head.next
+
+            while node != @tail
+                yield node.obj
+                node = node.next
+            end
+        end
+
+        def reverse
+            node = @head.next
+
+            # walk through swapping the next and previous pointers for each node
+
+            while node != @tail
+                next_node = node.next
+                node.next, node.prev = node.prev, node.next
+                node = next_node
+            end
+
+            # and now repoint the head and tail
+            @head.next, @tail.prev = @tail.prev, @head.next
+
+            self
+        end
+
+
+    end
+
     class Node
         attr_reader :value, :ptr
 
