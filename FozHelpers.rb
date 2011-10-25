@@ -258,7 +258,7 @@ end
 module Helpers
     ## basic doubly-linked list
 
-    class List
+    class LinkedList
         include Enumerable
 
         ListElem = Struct.new(:obj, :prev, :next)
@@ -290,7 +290,7 @@ module Helpers
 
         # return the head and remove it from the list
 
-        def shift
+        def pop
             val = @head.next.obj
             @head.next = @head.next.next
             @head.next.prev = @head
@@ -298,7 +298,7 @@ module Helpers
         end
 
         # return the tail and remove it from the list
-        def pop
+        def shift
             val = @tail.prev.obj
             @tail.prev = @tail.prev.prev
             @tail.prev.next = @tail
@@ -346,7 +346,8 @@ module Helpers
         alias :<< :append
 
         alias :count :length
-        alias :size :length
+        alias :size  :length
+        alias :push  :prepend
 
         def each
             node = @head.next
@@ -374,102 +375,16 @@ module Helpers
             self
         end
 
-
-    end
-
-    class Node
-        attr_reader :value, :ptr
-
-        def initialize(value, ptr)
-            @value, @ptr = value, ptr
-        end
-    end
-
-    class LinkedList
-        include Enumerable
-
-        attr_reader :size, :head
-
-        def initialize
-            clear
-            self
-        end
-
         def clear
-            @head, @tail, @size = nil, nil, 0
-        end
-
-        def empty?
-            head.nil?
-        end
-
-        def push(value)
-            @head = Node.new(value, head)
-            @size += 1
-            @last = @head if @last.nil?
-            self
-        end
-
-        def pop
-            return nil if empty?
-            @size -= 1
-            value = head.value
-            @head = head.ptr
-            @last = nil if empty?
-            value
-        end
-
-        def append(value)
-            replace reverse.push(value).reverse
-        end
-
-        def reverse
-            new_list = self.class.new
-            self.each { |x| new_list << x }
-            new_list
-        end
-
-        def reverse!
-            replace reverse
-        end
-
-        def each
-            return nil if empty?
-
-            node = head
-            loop do
-                yield node.value
-                node = node.ptr
-                break unless node
+            while self.length > 0
+                self.pop
             end
+            nil
         end
 
-        def last
-            return nil if empty?
-            @last.value
-        end
 
-        def first
-            return nil if empty?
-            @head.value
-        end
-
-        def ==(other)
-            head == other.head
-        end
-
-        def replace(other)
-            new_list = self.dup
-            clear
-            other.reverse.each { |x| push(x) }
-            self
-        end
-
-        alias_method :<<, :push
-        alias_method :unshift, :push
-        alias_method :length, :size
-        alias_method :shift, :pop
     end
+
 
     class Task < Object
 
