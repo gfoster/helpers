@@ -6,13 +6,11 @@ Summary: General purpose utility functions (not project specific)
 """
 
 import datetime
-import feedparser
 import grp
 import httplib
 import logging
 import logging.handlers
 import os
-import pickle
 import pwd
 import re
 import sys
