@@ -12,8 +12,8 @@ setup(
     description = ("a set of utility functions"),
     license = "MIT",
     keywords = "utility functions methods",
-    url = "http://github.org/gfoster/helpers",
-    packages=['fozhelpers', 'tests'],
+    url = "http://bitbucket.org/foz594/helpers",
+    packages=['fozhelpers'],
     long_description=read('README'),
     classifiers=[
         "Development Status :: 5 - Production/Stable",
