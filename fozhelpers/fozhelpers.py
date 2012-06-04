@@ -8,6 +8,7 @@ Summary: General purpose utility functions (not project specific)
 import datetime
 import grp
 import httplib
+import htmllib
 import logging
 import logging.handlers
 import os
@@ -622,3 +623,8 @@ def sendMail(mail_from, mail_to, subject, body, smtp_host, smtp_user=None, smtp_
 
     smtp.quit()
 
+def html_unescape(s):
+    p = htmllib.HTMLParser(None)
+    p.save_bgn()
+    p.feed(s)
+    return p.save_end()
