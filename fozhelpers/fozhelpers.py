@@ -612,13 +612,14 @@ def sendMail(mail_from, mail_to, subject, body, smtp_host, smtp_user=None, smtp_
 
     smtp = smtplib.SMTP(smtp_host)
 
-    if useTLS:
-        smtp.start_tls()
+    try:
+        if useTLS:
+            smtp.start_tls()
 
-    if smtp_user and smtp_password:
-        smtp.login(smtp_user, smtp_password)
+        if smtp_user and smtp_password:
+            smtp.login(smtp_user, smtp_password)
 
-    smtp.sendmail(mail_from, [mail_to], msg.as_string())
-
-    smtp.quit()
+        smtp.sendmail(mail_from, [mail_to], msg.as_string())
+    finally:
+        smtp.quit()
 
