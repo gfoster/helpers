@@ -18,6 +18,8 @@ import time
 import traceback
 import urllib
 import urllib2
+import smtplib
+from email.mime.text import MIMEText
 
 from urlparse import urlparse
 
@@ -595,8 +597,28 @@ def setPassword(username, password):
 
 def removeTimestamp(filename):
     # Remove timestamp added by webresource , e.g 2011-01-25T13-31-20-latest.tar.gz
-    import re
     tsPattern=r'^(19|20)\d\d[- / .](0[1-9]|1[012])[- / .](0[1-9]|[12][0-9]|3[01])T(0[0-9]|1[0-9]|2[0-4])[- / .](0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]|60)[- / .](0[0-9]|1[0-9]|2[0-9]|3[0-9]|4[0-9]|5[0-9]|60)-'
 
     return re.sub(tsPattern, '', filename)
+
+def sendMail(mail_from, mail_to, subject, body, smtp_host, smtp_user=None, smtp_password=None, useTLS=False):
+    "Connects to a remote SMTP server and sends email."
+
+    msg = MIMEText(body)
+
+    msg['From']    = mail_from
+    msg['To']      = mail_to
+    msg['Subject'] = subject
+
+    smtp = smtplib.SMTP(smtp_host)
+
+    if useTLS:
+        smtp.start_tls()
+
+    if smtp_user and smtp_password:
+        smtp.login(smtp_user, smtp_password)
+
+    smtp.sendmail(mail_from, [mail_to], msg.as_string())
+
+    smtp.quit()
 
